@@ -13,8 +13,6 @@ services:
       - PORT=${DB_PORT:-5432}
       - USER=${DB_USER:-odoo}
       - PASSWORD=${DB_PASSWORD:-odoo}
-    extra_hosts:
-      - "host.containers.internal:host-gateway"
     depends_on: []
 
 volumes:
