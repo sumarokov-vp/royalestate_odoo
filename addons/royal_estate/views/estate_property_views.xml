@@ -11,19 +11,17 @@
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="name" placeholder="Property Title..."/>
+                            <field name="name" placeholder="Название объекта..."/>
                         </h1>
                     </div>
                     <group>
                         <group>
                             <field name="property_type"/>
                             <field name="deal_type"/>
-                            <field name="rooms"/>
-                            <field name="area_total"/>
-                        </group>
-                        <group>
                             <field name="price"/>
                             <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group>
                             <field name="district_id"/>
                             <field name="street"/>
                             <field name="house_number"/>
@@ -32,24 +30,111 @@
                     <notebook>
                         <page string="Основное" name="main">
                             <group>
-                                <group string="Описание">
-                                    <field name="description" nolabel="1" colspan="2"/>
+                                <group string="Параметры">
+                                    <field name="rooms" invisible="property_type == 'land'"/>
+                                    <field name="area_total"/>
+                                    <field name="area_living" invisible="property_type not in ('apartment', 'house')"/>
+                                    <field name="area_kitchen" invisible="property_type not in ('apartment', 'house')"/>
+                                    <field name="area_land" invisible="property_type not in ('house', 'land')"/>
+                                    <field name="area_commercial" invisible="property_type != 'commercial'"/>
+                                    <field name="area_warehouse" invisible="property_type != 'commercial'"/>
+                                </group>
+                                <group string="Здание" invisible="property_type == 'land'">
+                                    <field name="floor" invisible="property_type not in ('apartment', 'commercial')"/>
+                                    <field name="floors_total" invisible="property_type == 'land'"/>
+                                    <field name="year_built"/>
+                                    <field name="building_type" invisible="property_type not in ('apartment', 'house')"/>
+                                    <field name="ceiling_height" invisible="property_type == 'land'"/>
+                                    <field name="entrance" invisible="property_type != 'apartment'"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Дом" invisible="property_type != 'house'">
+                                    <field name="wall_material"/>
+                                    <field name="roof_type"/>
+                                    <field name="foundation"/>
+                                </group>
+                                <group string="Коммерция" invisible="property_type != 'commercial'">
+                                    <field name="commercial_type"/>
+                                    <field name="has_showcase"/>
+                                    <field name="separate_entrance"/>
+                                    <field name="electricity_power"/>
+                                </group>
+                                <group string="Земля" invisible="property_type != 'land'">
+                                    <field name="land_category"/>
+                                    <field name="land_status"/>
+                                    <field name="communications_nearby"/>
+                                    <field name="road_access"/>
+                                </group>
+                            </group>
+                            <group string="Описание">
+                                <field name="description" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+                        <page string="Удобства" name="amenities" invisible="property_type == 'land'">
+                            <group>
+                                <group string="Комфорт">
+                                    <field name="bathroom" invisible="property_type == 'commercial'"/>
+                                    <field name="balcony" invisible="property_type != 'apartment'"/>
+                                    <field name="balcony_glazed" invisible="property_type != 'apartment'"/>
+                                    <field name="parking"/>
+                                    <field name="furniture" invisible="property_type == 'commercial'"/>
+                                    <field name="condition" invisible="property_type == 'land'"/>
+                                </group>
+                                <group string="Особенности">
+                                    <field name="plastic_windows" invisible="property_type == 'commercial'"/>
+                                    <field name="air_conditioning"/>
+                                    <field name="meters" invisible="property_type == 'commercial'"/>
+                                    <field name="not_corner" invisible="property_type != 'apartment'"/>
+                                    <field name="isolated_rooms" invisible="property_type != 'apartment'"/>
+                                    <field name="storage" invisible="property_type != 'apartment'"/>
+                                    <field name="quiet_yard" invisible="property_type != 'apartment'"/>
+                                    <field name="kitchen_studio" invisible="property_type != 'apartment'"/>
+                                    <field name="new_plumbing" invisible="property_type == 'commercial'"/>
+                                    <field name="built_in_kitchen" invisible="property_type == 'commercial'"/>
                                 </group>
                             </group>
                         </page>
-                        <page string="Характеристики" name="attributes">
-                            <field name="attribute_value_ids">
-                                <list editable="bottom">
-                                    <field name="attribute_id"/>
-                                    <field name="value_char" invisible="field_type != 'char'"/>
-                                    <field name="value_integer" invisible="field_type != 'integer'"/>
-                                    <field name="value_float" invisible="field_type != 'float'"/>
-                                    <field name="value_boolean" invisible="field_type != 'boolean'"/>
-                                    <field name="value_selection" invisible="field_type != 'selection'"/>
-                                    <field name="value_date" invisible="field_type != 'date'"/>
-                                    <field name="field_type" column_invisible="1"/>
-                                </list>
-                            </field>
+                        <page string="Коммуникации" name="utilities">
+                            <group>
+                                <group>
+                                    <field name="heating"/>
+                                    <field name="water" invisible="property_type == 'apartment'"/>
+                                    <field name="sewage" invisible="property_type == 'apartment'"/>
+                                </group>
+                                <group>
+                                    <field name="gas" invisible="property_type == 'apartment'"/>
+                                    <field name="electricity" invisible="property_type == 'apartment'"/>
+                                    <field name="internet" invisible="property_type == 'land'"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Безопасность" name="security" invisible="property_type == 'land'">
+                            <group>
+                                <group>
+                                    <field name="security_intercom" invisible="property_type != 'apartment'"/>
+                                    <field name="security_alarm"/>
+                                    <field name="security_guard" invisible="property_type == 'house'"/>
+                                </group>
+                                <group>
+                                    <field name="security_video"/>
+                                    <field name="security_coded_lock" invisible="property_type != 'apartment'"/>
+                                    <field name="security_bars" invisible="property_type != 'apartment'"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Юридическое" name="legal">
+                            <group>
+                                <group>
+                                    <field name="ownership_type"/>
+                                    <field name="is_pledged"/>
+                                    <field name="encumbrance"/>
+                                </group>
+                                <group>
+                                    <field name="is_privatized" invisible="property_type != 'apartment'"/>
+                                    <field name="documents_ready"/>
+                                </group>
+                            </group>
                         </page>
                         <page string="Собственник" name="owner">
                             <group>
@@ -107,14 +192,16 @@
         <field name="name">estate.property.list</field>
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
-            <list string="Properties" decoration-success="state == 'active'" decoration-warning="state == 'deposit'" decoration-info="state == 'deal'" decoration-muted="state in ('canceled', 'archived')">
+            <list string="Объекты" decoration-success="state == 'active'" decoration-warning="state == 'deposit'" decoration-info="state == 'deal'" decoration-muted="state in ('canceled', 'archived')">
                 <field name="name"/>
                 <field name="property_type"/>
                 <field name="deal_type"/>
                 <field name="rooms"/>
                 <field name="area_total"/>
+                <field name="floor" optional="show"/>
                 <field name="price"/>
                 <field name="district_id"/>
+                <field name="condition" optional="hide"/>
                 <field name="user_id" optional="hide"/>
                 <field name="state"/>
             </list>
@@ -164,6 +251,7 @@
                 <field name="price"/>
                 <field name="rooms"/>
                 <field name="area_total"/>
+                <field name="floor"/>
                 <field name="district_id"/>
                 <field name="state"/>
                 <templates>
@@ -173,7 +261,9 @@
                             <field name="district_id"/>
                         </div>
                         <div>
-                            <field name="rooms"/> rooms, <field name="area_total"/> m²
+                            <span t-if="record.rooms.raw_value"><field name="rooms"/> комн., </span>
+                            <field name="area_total"/> м²
+                            <span t-if="record.floor.raw_value">, <field name="floor"/> эт.</span>
                         </div>
                         <div class="fw-bold">
                             <field name="price" widget="monetary"/>

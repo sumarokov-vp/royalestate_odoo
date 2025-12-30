@@ -1,12 +1,13 @@
-from odoo import api, fields, models
+from odoo import fields, models
 
 
 class EstateProperty(models.Model):
     _name = "estate.property"
-    _description = "Real Estate Property"
+    _description = "Объект недвижимости"
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "create_date desc"
 
+    # === Основные ===
     name = fields.Char(string="Название", required=True, tracking=True)
     description = fields.Text(string="Описание")
     active = fields.Boolean(default=True)
@@ -56,13 +57,240 @@ class EstateProperty(models.Model):
         default=lambda self: self.env.company.currency_id,
     )
     rooms = fields.Integer(string="Комнат")
-    area_total = fields.Float(string="Площадь (м²)")
+    area_total = fields.Float(string="Общая площадь (м²)")
 
+    # === Адрес ===
     district_id = fields.Many2one("estate.district", string="Район", tracking=True)
     street = fields.Char(string="Улица")
     house_number = fields.Char(string="Дом")
 
+    # === Характеристики строения ===
+    floor = fields.Integer(string="Этаж")
+    floors_total = fields.Integer(string="Этажность")
+    year_built = fields.Integer(string="Год постройки")
+    building_type = fields.Selection(
+        [
+            ("panel", "Панельный"),
+            ("brick", "Кирпичный"),
+            ("monolith", "Монолит"),
+            ("block", "Блочный"),
+        ],
+        string="Тип строения",
+    )
+    ceiling_height = fields.Float(string="Высота потолков (м)")
+    entrance = fields.Integer(string="Подъезд")
+    wall_material = fields.Selection(
+        [
+            ("brick", "Кирпич"),
+            ("block", "Блок"),
+            ("wood", "Дерево"),
+            ("sip", "СИП-панели"),
+            ("frame", "Каркас"),
+        ],
+        string="Материал стен",
+    )
+    roof_type = fields.Selection(
+        [
+            ("flat", "Плоская"),
+            ("gable", "Двускатная"),
+            ("hip", "Вальмовая"),
+        ],
+        string="Тип крыши",
+    )
+    foundation = fields.Selection(
+        [
+            ("strip", "Ленточный"),
+            ("slab", "Плитный"),
+            ("pile", "Свайный"),
+        ],
+        string="Фундамент",
+    )
+
+    # === Площади ===
+    area_living = fields.Float(string="Жилая площадь (м²)")
+    area_kitchen = fields.Float(string="Площадь кухни (м²)")
+    area_land = fields.Float(string="Площадь участка (сотки)")
+    area_commercial = fields.Float(string="Торговая площадь (м²)")
+    area_warehouse = fields.Float(string="Складская площадь (м²)")
+
+    # === Удобства ===
+    bathroom = fields.Selection(
+        [
+            ("combined", "Совмещённый"),
+            ("separate", "Раздельный"),
+            ("two_plus", "Два и более"),
+        ],
+        string="Санузел",
+    )
+    balcony = fields.Selection(
+        [
+            ("none", "Нет"),
+            ("balcony", "Балкон"),
+            ("loggia", "Лоджия"),
+        ],
+        string="Балкон",
+    )
+    balcony_glazed = fields.Boolean(string="Балкон застеклён")
+    parking = fields.Selection(
+        [
+            ("none", "Нет"),
+            ("yard", "Двор"),
+            ("underground", "Подземная"),
+            ("garage", "Гараж"),
+        ],
+        string="Парковка",
+    )
+    furniture = fields.Selection(
+        [
+            ("none", "Без мебели"),
+            ("partial", "Частично"),
+            ("full", "Полная"),
+        ],
+        string="Мебель",
+    )
+    condition = fields.Selection(
+        [
+            ("no_repair", "Без ремонта"),
+            ("cosmetic", "Косметический"),
+            ("euro", "Евроремонт"),
+            ("designer", "Дизайнерский"),
+        ],
+        string="Состояние",
+    )
+
+    # === Коммуникации ===
+    heating = fields.Selection(
+        [
+            ("central", "Центральное"),
+            ("autonomous", "Автономное"),
+            ("none", "Нет"),
+        ],
+        string="Отопление",
+    )
+    water = fields.Selection(
+        [
+            ("central", "Центральное"),
+            ("well", "Скважина/колодец"),
+            ("none", "Нет"),
+        ],
+        string="Водоснабжение",
+    )
+    sewage = fields.Selection(
+        [
+            ("central", "Центральная"),
+            ("septic", "Септик"),
+            ("none", "Нет"),
+        ],
+        string="Канализация",
+    )
+    gas = fields.Selection(
+        [
+            ("central", "Центральный"),
+            ("balloon", "Баллон"),
+            ("none", "Нет"),
+        ],
+        string="Газ",
+    )
+    electricity = fields.Selection(
+        [
+            ("yes", "Есть"),
+            ("nearby", "Рядом"),
+            ("none", "Нет"),
+        ],
+        string="Электричество",
+    )
+    internet = fields.Boolean(string="Интернет")
+
+    # === Безопасность ===
+    security_intercom = fields.Boolean(string="Домофон")
+    security_alarm = fields.Boolean(string="Сигнализация")
+    security_guard = fields.Boolean(string="Охрана")
+    security_video = fields.Boolean(string="Видеонаблюдение")
+    security_coded_lock = fields.Boolean(string="Кодовый замок")
+    security_bars = fields.Boolean(string="Решётки на окнах")
+
+    # === Особенности ===
+    plastic_windows = fields.Boolean(string="Пластиковые окна")
+    air_conditioning = fields.Boolean(string="Кондиционер")
+    meters = fields.Boolean(string="Счётчики")
+    not_corner = fields.Boolean(string="Не угловая")
+    isolated_rooms = fields.Boolean(string="Изолированные комнаты")
+    storage = fields.Boolean(string="Кладовка")
+    quiet_yard = fields.Boolean(string="Тихий двор")
+    kitchen_studio = fields.Boolean(string="Кухня-студия")
+    new_plumbing = fields.Boolean(string="Новая сантехника")
+    built_in_kitchen = fields.Boolean(string="Встроенная кухня")
+
+    # === Юридическое ===
+    is_pledged = fields.Boolean(string="В залоге")
+    is_privatized = fields.Boolean(string="Приватизирована")
+    documents_ready = fields.Boolean(string="Документы готовы")
+    ownership_type = fields.Selection(
+        [
+            ("private", "Частная собственность"),
+            ("shared", "Долевая собственность"),
+            ("state", "Государственная"),
+        ],
+        string="Тип собственности",
+    )
+    encumbrance = fields.Boolean(string="Обременение")
+
+    # === Коммерческая недвижимость ===
+    commercial_type = fields.Selection(
+        [
+            ("office", "Офис"),
+            ("retail", "Торговое"),
+            ("warehouse", "Склад"),
+            ("production", "Производство"),
+        ],
+        string="Назначение",
+    )
+    has_showcase = fields.Boolean(string="Витрины")
+    separate_entrance = fields.Boolean(string="Отдельный вход")
+    electricity_power = fields.Integer(string="Мощность электричества (кВт)")
+
+    # === Земельные участки ===
+    land_category = fields.Selection(
+        [
+            ("izhs", "ИЖС"),
+            ("snt", "СНТ"),
+            ("lpkh", "ЛПХ"),
+            ("commercial", "Коммерческое"),
+        ],
+        string="Категория земли",
+    )
+    land_status = fields.Selection(
+        [
+            ("owned", "В собственности"),
+            ("leased", "В аренде"),
+        ],
+        string="Статус земли",
+    )
+    communications_nearby = fields.Boolean(string="Коммуникации рядом")
+    road_access = fields.Selection(
+        [
+            ("asphalt", "Асфальт"),
+            ("gravel", "Гравий"),
+            ("dirt", "Грунтовая"),
+            ("none", "Нет"),
+        ],
+        string="Подъездная дорога",
+    )
+
+    # === Собственник и договор ===
     owner_id = fields.Many2one("res.partner", string="Собственник", tracking=True)
+    source_id = fields.Many2one("estate.source", string="Источник")
+    contract_type = fields.Selection(
+        [
+            ("exclusive", "Эксклюзив"),
+            ("non_exclusive", "Не эксклюзив"),
+        ],
+        string="Тип договора",
+    )
+    contract_start = fields.Date(string="Начало договора")
+    contract_end = fields.Date(string="Окончание договора")
+
+    # === Ответственные ===
     user_id = fields.Many2one(
         "res.users",
         string="Ответственный",
@@ -79,73 +307,18 @@ class EstateProperty(models.Model):
         string="Листинг-агент",
     )
 
-    source_id = fields.Many2one("estate.source", string="Источник")
-    contract_type = fields.Selection(
-        [
-            ("exclusive", "Эксклюзив"),
-            ("non_exclusive", "Не эксклюзив"),
-        ],
-        string="Тип договора",
-    )
-    contract_start = fields.Date(string="Начало договора")
-    contract_end = fields.Date(string="Окончание договора")
+    # === Служебное ===
     is_shared = fields.Boolean(
         string="Открытый объект",
         help="Объект доступен другим агентам",
     )
-
     internal_note = fields.Text(string="Внутренние заметки")
     video_url = fields.Char(string="Видео")
     instagram_url = fields.Char(string="Instagram")
 
-    attribute_value_ids = fields.One2many(
-        "estate.property.attribute.value",
-        "property_id",
-        string="Характеристики",
-    )
+    # === Медиа ===
     image_ids = fields.One2many(
         "estate.property.image",
         "property_id",
         string="Фотографии",
     )
-
-    def get_attribute_value(self, code):
-        attr_value = self.attribute_value_ids.filtered(
-            lambda v: v.attribute_id.code == code
-        )
-        if not attr_value:
-            return None
-        return attr_value._get_value()
-
-    def set_attribute_value(self, code, value):
-        attribute = self.env["estate.attribute"].search([("code", "=", code)], limit=1)
-        if not attribute:
-            return
-
-        attr_value = self.attribute_value_ids.filtered(
-            lambda v: v.attribute_id.code == code
-        )
-
-        field_name = f"value_{attribute.field_type}"
-        vals = {"attribute_id": attribute.id, field_name: value}
-
-        if attr_value:
-            attr_value.write(vals)
-        else:
-            vals["property_id"] = self.id
-            self.env["estate.property.attribute.value"].create(vals)
-
-    @api.model
-    def search_by_attribute(self, code, operator, value):
-        attribute = self.env["estate.attribute"].search([("code", "=", code)], limit=1)
-        if not attribute:
-            return self.browse()
-
-        field_name = f"value_{attribute.field_type}"
-        attr_values = self.env["estate.property.attribute.value"].search(
-            [
-                ("attribute_id", "=", attribute.id),
-                (field_name, operator, value),
-            ]
-        )
-        return self.browse(attr_values.mapped("property_id.id"))

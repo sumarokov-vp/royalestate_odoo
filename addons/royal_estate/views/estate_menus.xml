@@ -11,6 +11,4 @@
     <menuitem id="estate_menu_districts" name="Районы" parent="estate_menu_config" action="estate_district_action" sequence="10"/>
 
     <menuitem id="estate_menu_sources" name="Источники" parent="estate_menu_config" action="estate_source_action" sequence="20"/>
-
-    <menuitem id="estate_menu_attributes" name="Атрибуты" parent="estate_menu_config" action="estate_attribute_action" sequence="30"/>
 </odoo>

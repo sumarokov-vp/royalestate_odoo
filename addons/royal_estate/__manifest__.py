@@ -7,7 +7,7 @@
         Royal Estate module for managing real estate properties.
 
         Features:
-        - Property management with EAV attributes
+        - Property management with 56+ attributes
         - Districts and sources lookups
         - CRM integration for deals
         - Role-based access control
@@ -21,7 +21,6 @@
         "security/ir.model.access.csv",
         "views/estate_district_views.xml",
         "views/estate_source_views.xml",
-        "views/estate_attribute_views.xml",
         "views/estate_property_views.xml",
         "views/crm_lead_views.xml",
         "views/estate_menus.xml",
