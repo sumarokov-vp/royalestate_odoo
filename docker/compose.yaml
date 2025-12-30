@@ -21,7 +21,7 @@ services:
       - letsencrypt:/letsencrypt
 
   odoo:
-    image: docker.io/sumarokovvp/simplelogic:royal_estate_arm
+    image: docker.io/sumarokovvp/simplelogic:royal_estate_amd64
     restart: unless-stopped
     volumes:
       - odoo-data:/var/lib/odoo
