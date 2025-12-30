@@ -144,13 +144,12 @@
                 <separator/>
                 <filter name="active_state" string="Active" domain="[('state', '=', 'active')]"/>
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Group By">
-                    <filter name="group_type" string="Property Type" context="{'group_by': 'property_type'}"/>
-                    <filter name="group_deal" string="Deal Type" context="{'group_by': 'deal_type'}"/>
-                    <filter name="group_district" string="District" context="{'group_by': 'district_id'}"/>
-                    <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
-                    <filter name="group_user" string="Responsible" context="{'group_by': 'user_id'}"/>
-                </group>
+                <separator/>
+                <filter name="group_type" string="Property Type" context="{'group_by': 'property_type'}"/>
+                <filter name="group_deal" string="Deal Type" context="{'group_by': 'deal_type'}"/>
+                <filter name="group_district" string="District" context="{'group_by': 'district_id'}"/>
+                <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
+                <filter name="group_user" string="Responsible" context="{'group_by': 'user_id'}"/>
             </search>
         </field>
     </record>

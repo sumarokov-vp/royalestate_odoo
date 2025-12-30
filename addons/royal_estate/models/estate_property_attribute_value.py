@@ -5,6 +5,13 @@ class EstatePropertyAttributeValue(models.Model):
     _name = "estate.property.attribute.value"
     _description = "Property Attribute Value"
 
+    _constraints = [
+        models.Constraint(
+            "UNIQUE(property_id, attribute_id)",
+            "Each attribute can only have one value per property",
+        ),
+    ]
+
     property_id = fields.Many2one(
         "estate.property",
         required=True,
@@ -26,14 +33,6 @@ class EstatePropertyAttributeValue(models.Model):
     value_boolean = fields.Boolean()
     value_selection = fields.Char()
     value_date = fields.Date()
-
-    _sql_constraints = [
-        (
-            "property_attribute_unique",
-            "UNIQUE(property_id, attribute_id)",
-            "Each attribute can only have one value per property",
-        ),
-    ]
 
     @api.depends("attribute_id", "value_char", "value_integer", "value_float", "value_boolean", "value_selection", "value_date")
     def _compute_display_name(self):

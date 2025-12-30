@@ -54,10 +54,9 @@
                 <filter name="filterable" string="Filterable" domain="[('is_filterable', '=', True)]"/>
                 <separator/>
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Group By">
-                    <filter name="group_category" string="Category" context="{'group_by': 'category'}"/>
-                    <filter name="group_type" string="Field Type" context="{'group_by': 'field_type'}"/>
-                </group>
+                <separator/>
+                <filter name="group_category" string="Category" context="{'group_by': 'category'}"/>
+                <filter name="group_type" string="Field Type" context="{'group_by': 'field_type'}"/>
             </search>
         </field>
     </record>

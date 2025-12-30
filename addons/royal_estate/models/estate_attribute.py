@@ -8,6 +8,13 @@ class EstateAttribute(models.Model):
 
     name = fields.Char(required=True, translate=True)
     code = fields.Char(required=True, index=True)
+
+    _constraints = [
+        models.Constraint(
+            "UNIQUE(code)",
+            "Attribute code must be unique",
+        ),
+    ]
     field_type = fields.Selection(
         [
             ("char", "Text"),
@@ -45,7 +52,3 @@ class EstateAttribute(models.Model):
     sequence = fields.Integer(default=10)
     is_filterable = fields.Boolean(default=False)
     active = fields.Boolean(default=True)
-
-    _sql_constraints = [
-        ("code_unique", "UNIQUE(code)", "Attribute code must be unique"),
-    ]
