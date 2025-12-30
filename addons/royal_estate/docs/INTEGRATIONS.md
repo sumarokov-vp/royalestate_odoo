@@ -3,26 +3,32 @@
 ## Архитектура системы
 
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  Odoo CRM       │────▶│  Royal Estate   │◀────│  ERP (Telegram) │
-│  (сделки)       │     │  (объекты)      │     │  (зарплаты)     │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                               │
-                        ┌──────┴──────┐
-                        ▼             ▼
-                 ┌───────────┐ ┌───────────┐
-                 │ S3 Storage│ │   2GIS    │
-                 │ (фото)    │ │ (карты)   │
-                 └───────────┘ └───────────┘
+                              ┌─────────────────┐
+                              │  ERP (Telegram) │
+                              │  (зарплаты)     │
+                              └────────▲────────┘
+                                       │ API
+                                       │ (сделки)
+┌─────────────────┐           ┌────────┴────────┐
+│  Royal Estate   │──────────▶│    Odoo CRM     │
+│  (объекты)      │  привязка │    (сделки)     │
+└─────────────────┘           └─────────────────┘
+        │
+ ┌──────┴──────┐
+ ▼             ▼
+┌───────────┐ ┌───────────┐
+│ S3 Storage│ │   2GIS    │
+│ (фото)    │ │ (карты)   │
+└───────────┘ └───────────┘
 ```
+
+**Ключевой момент:** ERP система работает с CRM (сделками), а не напрямую с базой объектов. Royal Estate — источник данных об объектах, CRM — источник данных о сделках для расчёта зарплат.
 
 ---
 
-## 1. CRM Odoo
+## 1. Odoo CRM — центр сделок
 
 ### Связь объекта со сделкой
-
-Объект недвижимости связывается со сделкой через поле `crm_lead_id`:
 
 ```python
 class EstateProperty(models.Model):
@@ -37,7 +43,7 @@ class EstateProperty(models.Model):
 
 ### Автоматическое создание сделки
 
-При переходе объекта в стадию "Задаток" автоматически создаётся сделка в CRM:
+При переходе объекта в стадию "Задаток" создаётся сделка в CRM:
 
 ```python
 @api.onchange('state')
@@ -54,34 +60,185 @@ def _onchange_state_create_lead(self):
 
 ---
 
-## 2. ERP (Telegram бот)
+## 2. Отслеживание участников для расчёта комиссии
+
+### Проблема
+
+По структуре ролей (docs/02_roles.md) комиссия распределяется между участниками:
+
+| Роль | Оплата |
+|------|--------|
+| Team Lead | Остаток от комиссии |
+| Listing Agent (VIP) | 25% |
+| ISA Inbound | 100К + 3% |
+| ISA Outbound | 100К + 5% |
+| Listing Coordinator | 80К |
+| Transaction Coordinator | 80К |
+| Listing Agent | 15% |
+| Buyer's Agent | 15% |
+
+### Решение: фиксация участников в Odoo
+
+В модели `estate.property` добавляем поля для отслеживания участников:
+
+```python
+class EstateProperty(models.Model):
+    _name = "estate.property"
+
+    # Кто внёс объект в базу (Listing Coordinator)
+    listing_coordinator_id = fields.Many2one(
+        'res.users',
+        string="Внёс в базу",
+        default=lambda self: self.env.user,
+        tracking=True
+    )
+    listing_date = fields.Datetime(
+        string="Дата внесения",
+        default=fields.Datetime.now
+    )
+
+    # Кто ведёт объект (Listing Agent)
+    listing_agent_id = fields.Many2one(
+        'res.users',
+        string="Листинг-агент",
+        tracking=True
+    )
+
+    # Ответственный агент (может меняться)
+    user_id = fields.Many2one(
+        'res.users',
+        string="Ответственный",
+        tracking=True
+    )
+```
+
+В расширении `crm.lead` добавляем поля для сделки:
+
+```python
+class CrmLead(models.Model):
+    _inherit = "crm.lead"
+
+    # Связь с объектом
+    property_id = fields.Many2one(
+        'estate.property',
+        string="Объект"
+    )
+
+    # Кто квалифицировал лид (ISA)
+    isa_user_id = fields.Many2one(
+        'res.users',
+        string="ISA (квалификация)",
+        tracking=True
+    )
+    isa_date = fields.Datetime(
+        string="Дата квалификации"
+    )
+
+    # Кто закрыл сделку (Buyer's Agent)
+    buyer_agent_id = fields.Many2one(
+        'res.users',
+        string="Агент покупателя",
+        tracking=True
+    )
+
+    # Кто вёл продавца (Listing Agent) — берётся из объекта
+    listing_agent_id = fields.Many2one(
+        related='property_id.listing_agent_id',
+        string="Агент продавца",
+        store=True
+    )
+
+    # Кто внёс объект в базу — берётся из объекта
+    listing_coordinator_id = fields.Many2one(
+        related='property_id.listing_coordinator_id',
+        string="Внёс в базу",
+        store=True
+    )
+
+    # Transaction Coordinator
+    transaction_coordinator_id = fields.Many2one(
+        'res.users',
+        string="Координатор сделки",
+        tracking=True
+    )
+```
+
+### Данные для ERP
+
+При закрытии сделки CRM передаёт в ERP:
+
+```json
+{
+  "deal_id": 123,
+  "deal_date": "2025-01-15",
+  "property_id": 456,
+  "price": 48000000,
+  "commission": 1440000,
+  "participants": {
+    "listing_coordinator": {
+      "user_id": 1,
+      "action": "property_created",
+      "date": "2024-12-01"
+    },
+    "isa": {
+      "user_id": 2,
+      "action": "lead_qualified",
+      "date": "2024-12-15"
+    },
+    "listing_agent": {
+      "user_id": 3,
+      "action": "seller_management"
+    },
+    "buyer_agent": {
+      "user_id": 4,
+      "action": "deal_closed"
+    },
+    "transaction_coordinator": {
+      "user_id": 5,
+      "action": "documents_prepared"
+    }
+  }
+}
+```
+
+### Логика: кто что получает
+
+| Участник | За что платим | Откуда данные |
+|----------|---------------|---------------|
+| Listing Coordinator | Внёс объект в базу | `estate.property.listing_coordinator_id` |
+| ISA | Квалифицировал лида | `crm.lead.isa_user_id` |
+| Listing Agent | Вёл продавца | `estate.property.listing_agent_id` |
+| Buyer's Agent | Закрыл сделку | `crm.lead.buyer_agent_id` |
+| Transaction Coordinator | Подготовил документы | `crm.lead.transaction_coordinator_id` |
+| Team Lead | Остаток | Рассчитывается в ERP |
+
+---
+
+## 3. ERP (Telegram бот) — расчёт зарплат
 
 ### API эндпоинты
 
+ERP работает с **CRM сделками**, а не с объектами:
+
 | Метод | Endpoint | Описание |
 |-------|----------|----------|
-| GET | `/api/v1/properties` | Список объектов |
-| GET | `/api/v1/properties/{id}` | Детали объекта |
-| POST | `/api/v1/properties/{id}/stage` | Изменить стадию |
-| GET | `/api/v1/agents/{id}/properties` | Объекты агента |
-| GET | `/api/v1/stats/deals` | Статистика сделок |
+| GET | `/api/v1/deals` | Список закрытых сделок |
+| GET | `/api/v1/deals/{id}` | Детали сделки с участниками |
+| GET | `/api/v1/deals/{id}/participants` | Участники сделки |
+| GET | `/api/v1/users/{id}/deals` | Сделки сотрудника |
+| GET | `/api/v1/stats/period` | Статистика за период |
 
 ### Авторизация
-
-API использует токен-авторизацию:
 
 ```
 Authorization: Bearer <api_token>
 ```
 
-Токен генерируется в настройках модуля Royal Estate.
-
-### Пример запроса
+### Пример запроса — закрытые сделки
 
 ```bash
-curl -X GET "https://odoo.example.com/api/v1/properties?state=deal" \
-  -H "Authorization: Bearer abc123" \
-  -H "Content-Type: application/json"
+curl -X GET "https://odoo.example.com/api/v1/deals?stage=won&date_from=2025-01-01" \
+  -H "Authorization: Bearer abc123"
 ```
 
 ### Пример ответа
@@ -89,57 +246,76 @@ curl -X GET "https://odoo.example.com/api/v1/properties?state=deal" \
 ```json
 {
   "count": 2,
-  "properties": [
+  "deals": [
     {
-      "id": 1,
-      "name": "2-комн. квартира, 48 м²",
+      "id": 123,
+      "name": "Сделка: 2-комн. квартира",
+      "property_id": 456,
       "price": 48000000,
-      "state": "deal",
-      "user_id": 5,
-      "user_name": "Иванов Пётр",
-      "deal_date": "2025-01-15"
+      "commission_total": 1440000,
+      "stage": "won",
+      "date_closed": "2025-01-15",
+      "participants": {
+        "listing_coordinator_id": 1,
+        "isa_user_id": 2,
+        "listing_agent_id": 3,
+        "buyer_agent_id": 4,
+        "transaction_coordinator_id": 5
+      }
     }
   ]
 }
 ```
 
-### События для ERP
-
-При изменении состояния объекта отправляется webhook:
+### Webhooks из CRM в ERP
 
 | Событие | Когда | Данные |
 |---------|-------|--------|
-| `property.sold` | Объект продан | property_id, price, user_id, commission |
-| `property.assigned` | Назначен агент | property_id, old_user_id, new_user_id |
-| `property.created` | Создан объект | property_id, user_id |
+| `deal.won` | Сделка закрыта | deal_id, participants, commission |
+| `deal.participant_changed` | Изменён участник | deal_id, role, old_user_id, new_user_id |
+| `property.created` | Создан объект | property_id, listing_coordinator_id |
 
 ```python
-def _trigger_webhook(self, event, data):
-    """Отправить событие в ERP"""
-    webhook_url = self.env['ir.config_parameter'].get_param('erp.webhook_url')
-    if webhook_url:
-        requests.post(webhook_url, json={
-            'event': event,
+class CrmLead(models.Model):
+    _inherit = "crm.lead"
+
+    def _notify_erp_deal_won(self):
+        """Уведомить ERP о закрытии сделки"""
+        webhook_url = self.env['ir.config_parameter'].get_param('erp.webhook_url')
+        if not webhook_url:
+            return
+
+        data = {
+            'event': 'deal.won',
             'timestamp': fields.Datetime.now().isoformat(),
-            'data': data
-        })
+            'deal': {
+                'id': self.id,
+                'property_id': self.property_id.id,
+                'price': self.expected_revenue,
+                'date_closed': self.date_closed.isoformat(),
+                'participants': {
+                    'listing_coordinator_id': self.listing_coordinator_id.id,
+                    'isa_user_id': self.isa_user_id.id,
+                    'listing_agent_id': self.listing_agent_id.id,
+                    'buyer_agent_id': self.buyer_agent_id.id,
+                    'transaction_coordinator_id': self.transaction_coordinator_id.id,
+                }
+            }
+        }
+        requests.post(webhook_url, json=data)
 ```
 
 ---
 
-## 3. 2GIS
+## 4. 2GIS
 
 ### Виджет карты
-
-В форме объекта отображается виджет 2GIS с меткой на карте:
 
 ```xml
 <field name="map_widget" widget="estate_2gis_map"/>
 ```
 
 ### Геокодирование
-
-При сохранении адреса автоматически определяются координаты:
 
 ```python
 def _compute_coordinates(self):
@@ -169,7 +345,7 @@ longitude = fields.Float(string="Долгота", digits=(10, 7))
 
 ---
 
-## 4. S3 Storage (фото)
+## 5. S3 Storage (фото)
 
 ### Архитектура
 
@@ -199,102 +375,31 @@ longitude = fields.Float(string="Долгота", digits=(10, 7))
 | `sequence` | Integer | Порядок сортировки |
 | `is_main` | Boolean | Главное фото |
 
-### Загрузка фото
-
-```python
-import boto3
-from PIL import Image
-import io
-
-def upload_image(self, image_data):
-    """Загрузить фото в S3 и создать миниатюру"""
-    s3 = boto3.client('s3',
-        endpoint_url=self.env['ir.config_parameter'].get_param('s3.endpoint'),
-        aws_access_key_id=self.env['ir.config_parameter'].get_param('s3.access_key'),
-        aws_secret_access_key=self.env['ir.config_parameter'].get_param('s3.secret_key'),
-    )
-
-    # Генерируем уникальный ключ
-    s3_key = f"properties/{self.property_id.id}/{uuid.uuid4()}.jpg"
-
-    # Загружаем оригинал в S3
-    s3.put_object(
-        Bucket='royal-estate',
-        Key=s3_key,
-        Body=image_data,
-        ContentType='image/jpeg'
-    )
-
-    # Создаём миниатюру
-    img = Image.open(io.BytesIO(image_data))
-    img.thumbnail((300, 200))
-    thumb_buffer = io.BytesIO()
-    img.save(thumb_buffer, format='JPEG')
-
-    self.write({
-        's3_key': s3_key,
-        's3_url': f"https://s3.example.com/royal-estate/{s3_key}",
-        'thumbnail': base64.b64encode(thumb_buffer.getvalue()),
-    })
-```
-
 ### Водяные знаки
 
-При экспорте фото накладывается водяной знак:
-
-```python
-def get_watermarked_image(self):
-    """Получить фото с водяным знаком"""
-    # Скачиваем оригинал из S3
-    original = self._download_from_s3()
-
-    # Накладываем водяной знак
-    img = Image.open(io.BytesIO(original))
-    watermark = Image.open('static/watermark.png')
-    img.paste(watermark, (10, 10), watermark)
-
-    buffer = io.BytesIO()
-    img.save(buffer, format='JPEG')
-    return buffer.getvalue()
-```
+При экспорте фото накладывается водяной знак с логотипом агентства.
 
 ---
 
-## 5. Матчинг (планируется)
+## 6. Матчинг (планируется)
 
 ### Концепция
 
 Внешний сервис для автоматического подбора объектов под потребности покупателей.
-
-### Потребность покупателя
-
-```json
-{
-  "deal_type": "sale",
-  "property_type": "apartment",
-  "price_min": 30000000,
-  "price_max": 50000000,
-  "rooms_min": 2,
-  "districts": ["medeu", "bostandyk"],
-  "must_have": ["parking", "not_first_floor"]
-}
-```
 
 ### API матчинга
 
 ```
 POST /api/v1/match
 {
-  "buyer_requirements": {...},
+  "buyer_requirements": {
+    "deal_type": "sale",
+    "property_type": "apartment",
+    "price_max": 50000000,
+    "rooms_min": 2,
+    "districts": ["medeu", "bostandyk"]
+  },
   "limit": 10
-}
-
-Response:
-{
-  "matches": [
-    {"property_id": 123, "score": 0.95},
-    {"property_id": 456, "score": 0.87}
-  ]
 }
 ```
 
