@@ -8,7 +8,7 @@
 
         Features:
         - Property management with 56+ attributes
-        - Districts and sources lookups
+        - Cities, districts and streets lookups
         - CRM integration for deals
         - Role-based access control
     """,
@@ -19,7 +19,9 @@
     "data": [
         "security/estate_security.xml",
         "security/ir.model.access.csv",
+        "views/estate_city_views.xml",
         "views/estate_district_views.xml",
+        "views/estate_street_views.xml",
         "views/estate_source_views.xml",
         "views/estate_property_views.xml",
         "views/crm_lead_views.xml",

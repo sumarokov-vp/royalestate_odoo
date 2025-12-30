@@ -8,7 +8,11 @@
 
     <menuitem id="estate_menu_config" name="Справочники" parent="estate_menu_root" sequence="100"/>
 
+    <menuitem id="estate_menu_cities" name="Города" parent="estate_menu_config" action="estate_city_action" sequence="5"/>
+
     <menuitem id="estate_menu_districts" name="Районы" parent="estate_menu_config" action="estate_district_action" sequence="10"/>
+
+    <menuitem id="estate_menu_streets" name="Улицы" parent="estate_menu_config" action="estate_street_action" sequence="15"/>
 
     <menuitem id="estate_menu_sources" name="Источники" parent="estate_menu_config" action="estate_source_action" sequence="20"/>
 </odoo>

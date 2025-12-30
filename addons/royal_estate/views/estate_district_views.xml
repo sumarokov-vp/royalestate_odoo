@@ -7,10 +7,25 @@
             <form string="Район">
                 <sheet>
                     <group>
-                        <field name="name"/>
-                        <field name="code"/>
-                        <field name="active"/>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                        </group>
+                        <group>
+                            <field name="city_id"/>
+                            <field name="active"/>
+                        </group>
                     </group>
+                    <notebook>
+                        <page string="Улицы" name="streets">
+                            <field name="street_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="active"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -23,7 +38,23 @@
             <list string="Районы">
                 <field name="name"/>
                 <field name="code"/>
+                <field name="city_id"/>
             </list>
+        </field>
+    </record>
+
+    <record id="estate_district_view_search" model="ir.ui.view">
+        <field name="name">estate.district.search</field>
+        <field name="model">estate.district</field>
+        <field name="arch" type="xml">
+            <search string="Районы">
+                <field name="name"/>
+                <field name="city_id"/>
+                <separator/>
+                <filter name="archived" string="Архив" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter name="group_city" string="Город" context="{'group_by': 'city_id'}"/>
+            </search>
         </field>
     </record>
 
@@ -31,5 +62,6 @@
         <field name="name">Районы</field>
         <field name="res_model">estate.district</field>
         <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_group_city': 1}</field>
     </record>
 </odoo>

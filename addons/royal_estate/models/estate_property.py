@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class EstateProperty(models.Model):
@@ -60,9 +60,39 @@ class EstateProperty(models.Model):
     area_total = fields.Float(string="Общая площадь (м²)")
 
     # === Адрес ===
-    district_id = fields.Many2one("estate.district", string="Район", tracking=True)
-    street = fields.Char(string="Улица")
+    city_id = fields.Many2one(
+        "estate.city",
+        string="Город",
+        default=lambda self: self._default_city(),
+        tracking=True,
+    )
+    district_id = fields.Many2one(
+        "estate.district",
+        string="Район",
+        domain="[('city_id', '=', city_id)]",
+        tracking=True,
+    )
+    street_id = fields.Many2one(
+        "estate.street",
+        string="Улица",
+        domain="[('district_id', '=', district_id)]",
+    )
     house_number = fields.Char(string="Дом")
+
+    @api.model
+    def _default_city(self):
+        return self.env["estate.city"].search([("code", "=", "almaty")], limit=1)
+
+    @api.onchange("city_id")
+    def _onchange_city_id(self):
+        if self.district_id and self.district_id.city_id != self.city_id:
+            self.district_id = False
+            self.street_id = False
+
+    @api.onchange("district_id")
+    def _onchange_district_id(self):
+        if self.street_id and self.street_id.district_id != self.district_id:
+            self.street_id = False
 
     # === Характеристики строения ===
     floor = fields.Integer(string="Этаж")

@@ -2,8 +2,12 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_estate_property_user,estate.property.user,model_estate_property,group_estate_user,1,0,0,0
 access_estate_property_agent,estate.property.agent,model_estate_property,group_estate_agent,1,1,1,0
 access_estate_property_manager,estate.property.manager,model_estate_property,group_estate_manager,1,1,1,1
+access_estate_city_user,estate.city.user,model_estate_city,group_estate_user,1,0,0,0
+access_estate_city_manager,estate.city.manager,model_estate_city,group_estate_manager,1,1,1,1
 access_estate_district_user,estate.district.user,model_estate_district,group_estate_user,1,0,0,0
 access_estate_district_manager,estate.district.manager,model_estate_district,group_estate_manager,1,1,1,1
+access_estate_street_user,estate.street.user,model_estate_street,group_estate_user,1,0,0,0
+access_estate_street_manager,estate.street.manager,model_estate_street,group_estate_manager,1,1,1,1
 access_estate_source_user,estate.source.user,model_estate_source,group_estate_user,1,0,0,0
 access_estate_source_manager,estate.source.manager,model_estate_source,group_estate_manager,1,1,1,1
 access_estate_property_image_user,estate.property.image.user,model_estate_property_image,group_estate_user,1,0,0,0

@@ -4,24 +4,46 @@ _logger = logging.getLogger(__name__)
 
 
 def post_init_hook(env):
+    _init_cities(env)
     _init_districts(env)
     _init_sources(env)
 
 
+def _init_cities(env):
+    cities = [
+        {"name": "Алматы", "code": "almaty", "sequence": 1},
+    ]
+    City = env["estate.city"]
+    for data in cities:
+        if not City.search([("code", "=", data["code"])], limit=1):
+            City.create(data)
+            _logger.info(f"Created city: {data['name']}")
+
+
 def _init_districts(env):
+    almaty = env["estate.city"].search([("code", "=", "almaty")], limit=1)
+    if not almaty:
+        _logger.warning("City Almaty not found, skipping districts init")
+        return
+
     districts = [
-        {"name": "Алатауский", "code": "alatau"},
-        {"name": "Алмалинский", "code": "almaly"},
-        {"name": "Ауэзовский", "code": "auezov"},
-        {"name": "Бостандыкский", "code": "bostandyk"},
-        {"name": "Жетысуский", "code": "zhetysu"},
-        {"name": "Медеуский", "code": "medeu"},
-        {"name": "Наурызбайский", "code": "nauryzbay"},
-        {"name": "Турксибский", "code": "turksib"},
+        {"name": "Алатауский", "code": "alatau", "city_id": almaty.id},
+        {"name": "Алмалинский", "code": "almaly", "city_id": almaty.id},
+        {"name": "Ауэзовский", "code": "auezov", "city_id": almaty.id},
+        {"name": "Бостандыкский", "code": "bostandyk", "city_id": almaty.id},
+        {"name": "Жетысуский", "code": "zhetysu", "city_id": almaty.id},
+        {"name": "Медеуский", "code": "medeu", "city_id": almaty.id},
+        {"name": "Наурызбайский", "code": "nauryzbay", "city_id": almaty.id},
+        {"name": "Турксибский", "code": "turksib", "city_id": almaty.id},
     ]
     District = env["estate.district"]
     for data in districts:
-        if not District.search([("code", "=", data["code"])], limit=1):
+        existing = District.search([("code", "=", data["code"])], limit=1)
+        if existing:
+            if not existing.city_id:
+                existing.write({"city_id": almaty.id})
+                _logger.info(f"Updated district with city: {data['name']}")
+        else:
             District.create(data)
             _logger.info(f"Created district: {data['name']}")
 

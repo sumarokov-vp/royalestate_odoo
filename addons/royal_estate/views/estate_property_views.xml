@@ -22,8 +22,9 @@
                             <field name="currency_id" invisible="1"/>
                         </group>
                         <group>
+                            <field name="city_id"/>
                             <field name="district_id"/>
-                            <field name="street"/>
+                            <field name="street_id"/>
                             <field name="house_number"/>
                         </group>
                     </group>
@@ -214,8 +215,9 @@
         <field name="arch" type="xml">
             <search string="Поиск объектов">
                 <field name="name"/>
-                <field name="street"/>
+                <field name="city_id"/>
                 <field name="district_id"/>
+                <field name="street_id"/>
                 <field name="owner_id"/>
                 <field name="user_id"/>
                 <separator/>
