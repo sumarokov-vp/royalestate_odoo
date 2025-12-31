@@ -331,6 +331,22 @@ class IrAttachment(models.Model):
         return True
 
     @api.model
+    def _get_path(self, bin_data, sha):
+        """Override for Odoo 19 compatibility.
+
+        In Odoo 19, _get_path is used to compute store_fname before _file_write.
+        We need to return the fs_storage prefixed path when fs_storage is used.
+        """
+        storage = self.env.context.get("storage_location") or self._storage()
+        if storage in self._get_storage_codes():
+            # For fs_storage, return the storage-prefixed path
+            path = self._get_fs_path(storage, bin_data)
+            fname = f"{storage}://{path}"
+            # Return empty string for full_path as we don't use local filestore
+            return fname, ""
+        return super()._get_path(bin_data, sha)
+
+    @api.model
     def _file_read(self, fname):
         if self._is_file_from_a_storage(fname):
             return self._storage_file_read(fname)
@@ -341,10 +357,8 @@ class IrAttachment(models.Model):
     def _file_write(self, bin_data, checksum):
         location = self.env.context.get("storage_location") or self._storage()
         if location in self._get_storage_codes():
-            filename = self._storage_file_write(bin_data)
-        else:
-            filename = super()._file_write(bin_data, checksum)
-        return filename
+            return self._storage_file_write(bin_data)
+        return super()._file_write(bin_data, checksum)
 
     @api.model
     def _file_delete(self, fname) -> None:  # pylint: disable=missing-return
@@ -461,28 +475,28 @@ class IrAttachment(models.Model):
 
         Keeping the same meaning and mimetype is important to also ease to provide
         a meaningful and SEO friendly URL to the file in the filesystem storage.
+
+        NOTE: In Odoo 19+, file writing happens AFTER record creation, so we skip
+        the rename operation. Files will keep their hash-based names.
         """
         for attachment in self:
             if not self._is_file_from_a_storage(attachment.store_fname):
                 continue
             fs, storage, filename = attachment._get_fs_parts()
 
+            # In Odoo 19+, file is written AFTER record creation by base Odoo.
+            # We cannot rename a file that doesn't exist yet.
+            # Just set fs_filename to the basename and skip rename.
+            attachment.fs_filename = os.path.basename(filename)
+
             if self.env["fs.storage"]._must_use_filename_obfuscation(storage):
-                attachment.fs_filename = filename
                 continue
-            new_filename = attachment._build_fs_filename()
-            # we must keep the same full path as the original filename
-            new_filename_with_path = os.path.join(
-                os.path.dirname(filename), new_filename
+
+            # TODO: Implement deferred rename after file is actually written
+            # For now, files keep their hash-based names in Odoo 19+
+            _logger.debug(
+                "Skipping file rename for %s (Odoo 19+ compatibility)", filename
             )
-            fs.rename(filename, new_filename_with_path)
-            attachment.fs_filename = new_filename
-            # we need to update the store_fname with the new filename by
-            # calling the write method of the field since the write method
-            # of ir_attachment prevent normal write on store_fname
-            # flake8: noqa: E231
-            attachment._force_write_store_fname(f"{storage}://{new_filename_with_path}")
-            self._fs_mark_for_gc(attachment.store_fname)
 
     def _force_write_store_fname(self, store_fname):
         """Force the write of the store_fname field
