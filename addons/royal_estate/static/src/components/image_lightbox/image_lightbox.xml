@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="royal_estate.ImageLightbox">
+        <Dialog size="'xl'" contentClass="'o_image_lightbox_dialog p-0'">
+            <div class="o_image_lightbox">
+                <div class="o_lightbox_main">
+                    <t t-if="hasMultipleImages">
+                        <button class="o_lightbox_nav o_lightbox_prev" t-on-click="prev" title="Предыдущее (←)">
+                            <i class="fa fa-chevron-left fa-2x"/>
+                        </button>
+                    </t>
+
+                    <div class="o_lightbox_image_container">
+                        <img
+                            t-att-src="currentImage.fullUrl"
+                            t-att-alt="currentImage.name || 'Фото'"
+                            class="o_lightbox_image"
+                        />
+                    </div>
+
+                    <t t-if="hasMultipleImages">
+                        <button class="o_lightbox_nav o_lightbox_next" t-on-click="next" title="Следующее (→)">
+                            <i class="fa fa-chevron-right fa-2x"/>
+                        </button>
+                    </t>
+                </div>
+
+                <div class="o_lightbox_footer">
+                    <div class="o_lightbox_info">
+                        <span class="o_lightbox_counter" t-if="hasMultipleImages" t-esc="counter"/>
+                        <span class="o_lightbox_name" t-if="currentImage.name" t-esc="currentImage.name"/>
+                    </div>
+                    <div class="o_lightbox_actions">
+                        <button
+                            class="btn btn-sm"
+                            t-att-class="currentImage.is_main ? 'btn-warning' : 'btn-outline-warning'"
+                            t-on-click="setAsMain"
+                            title="Сделать главным"
+                            t-if="props.onSetMain"
+                        >
+                            <i class="fa fa-star"/>
+                        </button>
+                        <button
+                            class="btn btn-sm btn-outline-danger"
+                            t-on-click="deleteImage"
+                            title="Удалить"
+                            t-if="props.onDelete"
+                        >
+                            <i class="fa fa-trash"/>
+                        </button>
+                        <button class="btn btn-sm btn-secondary" t-on-click="props.close">
+                            Закрыть
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Dialog>
+    </t>
+</templates>

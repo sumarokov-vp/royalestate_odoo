@@ -28,6 +28,15 @@
         "views/estate_menus.xml",
     ],
     "demo": [],
+    "assets": {
+        "web.assets_backend": [
+            "royal_estate/static/src/fields/*.js",
+            "royal_estate/static/src/fields/*.xml",
+            "royal_estate/static/src/components/**/*.js",
+            "royal_estate/static/src/components/**/*.xml",
+            "royal_estate/static/src/components/**/*.scss",
+        ],
+    },
     "installable": True,
     "application": True,
     "auto_install": False,

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="royal_estate.ImageGalleryField">
+        <div class="o_image_gallery_field">
+            <t t-if="state.isLoading">
+                <div class="o_image_gallery_loading text-center p-4">
+                    <i class="fa fa-spinner fa-spin fa-2x"/>
+                    <p class="mt-2 text-muted">Загрузка...</p>
+                </div>
+            </t>
+            <t t-else="">
+                <ImageGallery
+                    images="state.images"
+                    thumbnailSize="thumbnailSize"
+                    onImageClick.bind="onImageClick"
+                    onReorder.bind="onReorder"
+                    readonly="readonly"
+                />
+                <t t-if="!readonly">
+                    <div class="o_image_gallery_actions mt-3">
+                        <button class="btn btn-secondary" t-on-click="onAddImage">
+                            <i class="fa fa-plus me-1"/>Добавить фото
+                        </button>
+                        <input
+                            t-ref="fileInput"
+                            type="file"
+                            accept="image/*"
+                            multiple="multiple"
+                            class="d-none"
+                            t-on-change="onFileSelected"
+                        />
+                    </div>
+                </t>
+            </t>
+        </div>
+    </t>
+</templates>

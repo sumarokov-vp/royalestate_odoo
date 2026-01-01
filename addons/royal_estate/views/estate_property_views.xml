@@ -157,14 +157,7 @@
                                     <field name="instagram_url" widget="url"/>
                                 </group>
                             </group>
-                            <field name="image_ids">
-                                <list editable="bottom">
-                                    <field name="sequence" widget="handle"/>
-                                    <field name="name"/>
-                                    <field name="image" widget="image" options="{'size': [100, 100]}"/>
-                                    <field name="is_main"/>
-                                </list>
-                            </field>
+                            <field name="image_ids" widget="image_gallery"/>
                         </page>
                         <page string="Служебное" name="service">
                             <group>
