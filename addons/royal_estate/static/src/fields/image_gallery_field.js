@@ -47,18 +47,16 @@ export class ImageGalleryField extends Component {
         this.state.isLoading = true;
 
         try {
-            const fieldData = props.record.data[props.name];
-            if (!fieldData || !fieldData.records || fieldData.records.length === 0) {
+            const propertyId = props.record.resId;
+            if (!propertyId) {
                 this.state.images = [];
                 this.state.isLoading = false;
                 return;
             }
 
-            const recordIds = fieldData.records.map((r) => r.resId);
-
             const images = await this.orm.searchRead(
                 "estate.property.image",
-                [["id", "in", recordIds]],
+                [["property_id", "=", propertyId]],
                 ["id", "name", "sequence", "is_main"],
                 { order: "sequence, id" }
             );
