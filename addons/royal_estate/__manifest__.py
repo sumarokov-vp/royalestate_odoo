@@ -27,6 +27,7 @@
         "views/estate_property_views.xml",
         "views/crm_lead_views.xml",
         "views/estate_menus.xml",
+        "wizards/krisha_parser_views.xml",
     ],
     "demo": [],
     "assets": {

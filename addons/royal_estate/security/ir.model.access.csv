@@ -13,3 +13,9 @@ access_estate_source_manager,estate.source.manager,model_estate_source,group_est
 access_estate_property_image_user,estate.property.image.user,model_estate_property_image,group_estate_user,1,0,0,0
 access_estate_property_image_agent,estate.property.image.agent,model_estate_property_image,group_estate_agent,1,1,1,0
 access_estate_property_image_manager,estate.property.image.manager,model_estate_property_image,group_estate_manager,1,1,1,1
+access_krisha_parser_wizard_agent,krisha.parser.wizard.agent,model_krisha_parser_wizard,group_estate_agent,1,1,1,1
+access_krisha_parser_wizard_manager,krisha.parser.wizard.manager,model_krisha_parser_wizard,group_estate_manager,1,1,1,1
+access_krisha_parser_preview_agent,krisha.parser.preview.agent,model_krisha_parser_preview,group_estate_agent,1,1,1,1
+access_krisha_parser_preview_manager,krisha.parser.preview.manager,model_krisha_parser_preview,group_estate_manager,1,1,1,1
+access_krisha_parser_result_agent,krisha.parser.result.agent,model_krisha_parser_result,group_estate_agent,1,1,1,1
+access_krisha_parser_result_manager,krisha.parser.result.manager,model_krisha_parser_result,group_estate_manager,1,1,1,1

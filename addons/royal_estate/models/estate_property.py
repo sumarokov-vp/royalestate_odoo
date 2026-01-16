@@ -368,6 +368,7 @@ class EstateProperty(models.Model):
     internal_note = fields.Text(string="Внутренние заметки")
     video_url = fields.Char(string="Видео")
     instagram_url = fields.Char(string="Instagram")
+    krisha_url = fields.Char(string="URL на Krisha.kz")
 
     # === Медиа ===
     image_ids = fields.One2many(

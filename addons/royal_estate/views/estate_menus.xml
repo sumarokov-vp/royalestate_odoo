@@ -6,6 +6,8 @@
 
     <menuitem id="estate_menu_property_list" name="Все объекты" parent="estate_menu_properties" action="estate_property_action" sequence="10"/>
 
+    <menuitem id="estate_menu_krisha_parser" name="Парсить Krisha.kz" parent="estate_menu_root" action="action_krisha_parser" sequence="50"/>
+
     <menuitem id="estate_menu_config" name="Справочники" parent="estate_menu_root" sequence="100"/>
 
     <menuitem id="estate_menu_cities" name="Города" parent="estate_menu_config" action="estate_city_action" sequence="5"/>

@@ -152,6 +152,7 @@
                                 <group>
                                     <field name="owner_id"/>
                                     <field name="source_id"/>
+                                    <field name="krisha_url" widget="url"/>
                                 </group>
                                 <group>
                                     <field name="contract_type"/>

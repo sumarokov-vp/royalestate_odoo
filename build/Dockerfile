@@ -8,7 +8,8 @@ RUN pip3 install --no-cache-dir --break-system-packages \
     "fsspec>=2025.3.0" \
     "s3fs>=2024.2.0" \
     python-slugify \
-    packaging
+    packaging \
+    beautifulsoup4
 
 # Copy custom addons
 COPY ./addons /mnt/extra-addons
