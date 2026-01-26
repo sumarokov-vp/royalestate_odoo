@@ -1,6 +1,6 @@
 {
     "name": "Royal Estate",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Real Estate",
     "summary": "Manage real estate properties",
     "description": """
