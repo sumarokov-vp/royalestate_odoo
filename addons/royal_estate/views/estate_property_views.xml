@@ -27,6 +27,7 @@
                             <group>
                                 <group string="Параметры">
                                     <field name="rooms" invisible="property_type == 'land'"/>
+                                    <field name="bedrooms" invisible="property_type == 'land'"/>
                                     <field name="area_total"/>
                                     <field name="area_living" invisible="property_type not in ('apartment', 'house')"/>
                                     <field name="area_kitchen" invisible="property_type not in ('apartment', 'house')"/>
@@ -38,9 +39,9 @@
                                     <field name="floor" invisible="property_type not in ('apartment', 'commercial')"/>
                                     <field name="floors_total" invisible="property_type == 'land'"/>
                                     <field name="year_built"/>
-                                    <field name="building_type" invisible="property_type not in ('apartment', 'house')"/>
+                                    <field name="building_type" invisible="property_type not in ('apartment', 'house', 'townhouse')"/>
                                     <field name="ceiling_height" invisible="property_type == 'land'"/>
-                                    <field name="entrance" invisible="property_type != 'apartment'"/>
+                                    <field name="entrance" invisible="property_type not in ('apartment', 'townhouse')"/>
                                 </group>
                             </group>
                             <group>
@@ -53,7 +54,6 @@
                                     <field name="commercial_type"/>
                                     <field name="has_showcase"/>
                                     <field name="separate_entrance"/>
-                                    <field name="electricity_power"/>
                                 </group>
                                 <group string="Земля" invisible="property_type != 'land'">
                                     <field name="land_category"/>
@@ -86,25 +86,29 @@
                             <group>
                                 <group string="Комфорт">
                                     <field name="bathroom" invisible="property_type == 'commercial'"/>
-                                    <field name="balcony" invisible="property_type != 'apartment'"/>
-                                    <field name="balcony_glazed" invisible="property_type != 'apartment'"/>
+                                    <field name="bathroom_count" invisible="property_type == 'commercial'"/>
+                                    <field name="balcony" invisible="property_type not in ('apartment', 'townhouse')"/>
+                                    <field name="balcony_glazed" invisible="property_type not in ('apartment', 'townhouse')"/>
                                     <field name="parking"/>
+                                    <field name="parking_count"/>
                                     <field name="furniture" invisible="property_type == 'commercial'"/>
                                     <field name="condition" invisible="property_type == 'land'"/>
                                 </group>
                                 <group string="Особенности">
-                                    <field name="plastic_windows" invisible="property_type == 'commercial'"/>
-                                    <field name="air_conditioning"/>
-                                    <field name="meters" invisible="property_type == 'commercial'"/>
-                                    <field name="not_corner" invisible="property_type != 'apartment'"/>
-                                    <field name="isolated_rooms" invisible="property_type != 'apartment'"/>
-                                    <field name="storage" invisible="property_type != 'apartment'"/>
-                                    <field name="quiet_yard" invisible="property_type != 'apartment'"/>
-                                    <field name="kitchen_studio" invisible="property_type != 'apartment'"/>
+                                    <field name="window_type" invisible="property_type == 'commercial'"/>
+                                    <field name="climate_equipment_ids" widget="many2many_tags"/>
+                                    <field name="not_corner" invisible="property_type not in ('apartment', 'townhouse')"/>
+                                    <field name="isolated_rooms" invisible="property_type not in ('apartment', 'townhouse')"/>
+                                    <field name="storage" invisible="property_type not in ('apartment', 'townhouse')"/>
+                                    <field name="quiet_yard" invisible="property_type not in ('apartment', 'townhouse')"/>
+                                    <field name="kitchen_studio" invisible="property_type not in ('apartment', 'townhouse')"/>
                                     <field name="new_plumbing" invisible="property_type == 'commercial'"/>
                                     <field name="built_in_kitchen" invisible="property_type == 'commercial'"/>
                                 </group>
                             </group>
+                        </page>
+                        <page string="Бытовая техника" name="appliances" invisible="property_type == 'land'">
+                            <field name="appliance_ids" widget="many2many_checkboxes" nolabel="1"/>
                         </page>
                         <page string="Коммуникации" name="utilities">
                             <group>
@@ -116,6 +120,7 @@
                                 <group>
                                     <field name="gas" invisible="property_type == 'apartment'"/>
                                     <field name="electricity" invisible="property_type == 'apartment'"/>
+                                    <field name="electricity_power" invisible="property_type == 'land'"/>
                                     <field name="internet" invisible="property_type == 'land'"/>
                                 </group>
                             </group>
@@ -123,14 +128,16 @@
                         <page string="Безопасность" name="security" invisible="property_type == 'land'">
                             <group>
                                 <group>
-                                    <field name="security_intercom" invisible="property_type != 'apartment'"/>
+                                    <field name="security_intercom" invisible="property_type not in ('apartment', 'townhouse')"/>
                                     <field name="security_alarm"/>
                                     <field name="security_guard" invisible="property_type == 'house'"/>
+                                    <field name="security_concierge" invisible="property_type not in ('apartment', 'townhouse')"/>
                                 </group>
                                 <group>
                                     <field name="security_video"/>
-                                    <field name="security_coded_lock" invisible="property_type != 'apartment'"/>
-                                    <field name="security_bars" invisible="property_type != 'apartment'"/>
+                                    <field name="security_coded_lock" invisible="property_type not in ('apartment', 'townhouse')"/>
+                                    <field name="security_bars" invisible="property_type not in ('apartment', 'townhouse')"/>
+                                    <field name="security_fire_alarm"/>
                                 </group>
                             </group>
                         </page>
@@ -230,6 +237,7 @@
                 <separator/>
                 <filter name="apartments" string="Квартиры" domain="[('property_type', '=', 'apartment')]"/>
                 <filter name="houses" string="Дома" domain="[('property_type', '=', 'house')]"/>
+                <filter name="townhouses" string="Таунхаусы" domain="[('property_type', '=', 'townhouse')]"/>
                 <filter name="commercial" string="Коммерция" domain="[('property_type', '=', 'commercial')]"/>
                 <filter name="land" string="Земля" domain="[('property_type', '=', 'land')]"/>
                 <separator/>

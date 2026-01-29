@@ -16,6 +16,7 @@ class EstateProperty(models.Model):
         [
             ("apartment", "Квартира"),
             ("house", "Дом"),
+            ("townhouse", "Таунхаус"),
             ("commercial", "Коммерция"),
             ("land", "Земля"),
         ],
@@ -57,6 +58,7 @@ class EstateProperty(models.Model):
         default=lambda self: self.env.company.currency_id,
     )
     rooms = fields.Integer(string="Комнат")
+    bedrooms = fields.Integer(string="Спален")
     area_total = fields.Float(string="Общая площадь (м²)")
 
     # === Адрес ===
@@ -126,7 +128,8 @@ class EstateProperty(models.Model):
             ("panel", "Панельный"),
             ("brick", "Кирпичный"),
             ("monolith", "Монолит"),
-            ("block", "Блочный"),
+            ("metal_frame", "Металлокаркас"),
+            ("wood", "Деревянный"),
         ],
         string="Тип строения",
     )
@@ -135,10 +138,11 @@ class EstateProperty(models.Model):
     wall_material = fields.Selection(
         [
             ("brick", "Кирпич"),
-            ("block", "Блок"),
+            ("gas_block", "Газоблок"),
             ("wood", "Дерево"),
             ("sip", "СИП-панели"),
             ("frame", "Каркас"),
+            ("polystyrene", "Полистиролбетон"),
         ],
         string="Материал стен",
     )
@@ -175,6 +179,7 @@ class EstateProperty(models.Model):
         ],
         string="Санузел",
     )
+    bathroom_count = fields.Integer(string="Количество санузлов")
     balcony = fields.Selection(
         [
             ("none", "Нет"),
@@ -190,9 +195,11 @@ class EstateProperty(models.Model):
             ("yard", "Двор"),
             ("underground", "Подземная"),
             ("garage", "Гараж"),
+            ("ground", "Наземная"),
         ],
         string="Парковка",
     )
+    parking_count = fields.Integer(string="Количество парковок")
     furniture = fields.Selection(
         [
             ("none", "Без мебели"),
@@ -240,6 +247,7 @@ class EstateProperty(models.Model):
         [
             ("central", "Центральный"),
             ("balloon", "Баллон"),
+            ("gas_tank", "Газгольдер"),
             ("none", "Нет"),
         ],
         string="Газ",
@@ -252,7 +260,16 @@ class EstateProperty(models.Model):
         ],
         string="Электричество",
     )
-    internet = fields.Boolean(string="Интернет")
+    internet = fields.Selection(
+        [
+            ("none", "Нет"),
+            ("wired", "Проводной"),
+            ("fiber", "Оптика"),
+            ("dsl", "DSL"),
+            ("mobile", "Мобильный (4G/5G)"),
+        ],
+        string="Интернет",
+    )
 
     # === Безопасность ===
     security_intercom = fields.Boolean(string="Домофон")
@@ -261,11 +278,26 @@ class EstateProperty(models.Model):
     security_video = fields.Boolean(string="Видеонаблюдение")
     security_coded_lock = fields.Boolean(string="Кодовый замок")
     security_bars = fields.Boolean(string="Решётки на окнах")
+    security_concierge = fields.Boolean(string="Консьерж")
+    security_fire_alarm = fields.Boolean(string="Пожарная сигнализация")
 
     # === Особенности ===
-    plastic_windows = fields.Boolean(string="Пластиковые окна")
-    air_conditioning = fields.Boolean(string="Кондиционер")
-    meters = fields.Boolean(string="Счётчики")
+    window_type = fields.Selection(
+        [
+            ("plastic", "Пластиковые"),
+            ("wood", "Деревянные"),
+            ("aluminum", "Алюминиевые"),
+        ],
+        string="Окна",
+    )
+    climate_equipment_ids = fields.Many2many(
+        "estate.climate.equipment",
+        string="Климатическое оборудование",
+    )
+    appliance_ids = fields.Many2many(
+        "estate.appliance",
+        string="Бытовая техника",
+    )
     not_corner = fields.Boolean(string="Не угловая")
     isolated_rooms = fields.Boolean(string="Изолированные комнаты")
     storage = fields.Boolean(string="Кладовка")
@@ -277,7 +309,7 @@ class EstateProperty(models.Model):
     # === Юридическое ===
     is_pledged = fields.Boolean(string="В залоге")
     is_privatized = fields.Boolean(string="Приватизирована")
-    documents_ready = fields.Boolean(string="Документы готовы")
+    documents_ready = fields.Boolean(string="Документы готовы к сделке")
     ownership_type = fields.Selection(
         [
             ("private", "Частная собственность"),

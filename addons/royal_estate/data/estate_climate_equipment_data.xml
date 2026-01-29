@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="climate_air_conditioner" model="estate.climate.equipment">
+        <field name="name">Кондиционер</field>
+        <field name="code">air_conditioner</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="climate_ventilation" model="estate.climate.equipment">
+        <field name="name">Вентиляция</field>
+        <field name="code">ventilation</field>
+        <field name="sequence">2</field>
+    </record>
+
+    <record id="climate_gas_boiler" model="estate.climate.equipment">
+        <field name="name">Газовый котёл</field>
+        <field name="code">gas_boiler</field>
+        <field name="sequence">3</field>
+    </record>
+
+    <record id="climate_recuperator" model="estate.climate.equipment">
+        <field name="name">Рекуператор</field>
+        <field name="code">recuperator</field>
+        <field name="sequence">4</field>
+    </record>
+
+    <record id="climate_central_heating" model="estate.climate.equipment">
+        <field name="name">Центральное отопление</field>
+        <field name="code">central_heating</field>
+        <field name="sequence">5</field>
+    </record>
+</odoo>

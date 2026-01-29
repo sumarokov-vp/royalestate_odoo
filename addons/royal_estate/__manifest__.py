@@ -1,6 +1,6 @@
 {
     "name": "Royal Estate",
-    "version": "19.0.1.1.0",
+    "version": "19.0.1.2.0",
     "category": "Real Estate",
     "summary": "Manage real estate properties",
     "description": """
@@ -20,10 +20,15 @@
         "security/estate_security.xml",
         "security/ir.model.access.csv",
         "data/ir_config_parameter.xml",
+        "data/estate_city_data.xml",
+        "data/estate_climate_equipment_data.xml",
+        "data/estate_appliance_data.xml",
         "views/estate_city_views.xml",
         "views/estate_district_views.xml",
         "views/estate_street_views.xml",
         "views/estate_source_views.xml",
+        "views/estate_climate_equipment_views.xml",
+        "views/estate_appliance_views.xml",
         "views/estate_property_views.xml",
         "views/crm_lead_views.xml",
         "views/estate_menus.xml",

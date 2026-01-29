@@ -19,3 +19,7 @@ access_krisha_parser_preview_agent,krisha.parser.preview.agent,model_krisha_pars
 access_krisha_parser_preview_manager,krisha.parser.preview.manager,model_krisha_parser_preview,group_estate_manager,1,1,1,1
 access_krisha_parser_result_agent,krisha.parser.result.agent,model_krisha_parser_result,group_estate_agent,1,1,1,1
 access_krisha_parser_result_manager,krisha.parser.result.manager,model_krisha_parser_result,group_estate_manager,1,1,1,1
+access_estate_climate_equipment_user,estate.climate.equipment.user,model_estate_climate_equipment,group_estate_user,1,0,0,0
+access_estate_climate_equipment_manager,estate.climate.equipment.manager,model_estate_climate_equipment,group_estate_manager,1,1,1,1
+access_estate_appliance_user,estate.appliance.user,model_estate_appliance,group_estate_user,1,0,0,0
+access_estate_appliance_manager,estate.appliance.manager,model_estate_appliance,group_estate_manager,1,1,1,1

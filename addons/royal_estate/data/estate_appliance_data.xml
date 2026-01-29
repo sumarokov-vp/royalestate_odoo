@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="appliance_refrigerator" model="estate.appliance">
+        <field name="name">Холодильник</field>
+        <field name="code">refrigerator</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="appliance_washing_machine" model="estate.appliance">
+        <field name="name">Стиральная машина</field>
+        <field name="code">washing_machine</field>
+        <field name="sequence">2</field>
+    </record>
+
+    <record id="appliance_dishwasher" model="estate.appliance">
+        <field name="name">Посудомоечная машина</field>
+        <field name="code">dishwasher</field>
+        <field name="sequence">3</field>
+    </record>
+
+    <record id="appliance_stove" model="estate.appliance">
+        <field name="name">Плита</field>
+        <field name="code">stove</field>
+        <field name="sequence">4</field>
+    </record>
+
+    <record id="appliance_oven" model="estate.appliance">
+        <field name="name">Духовой шкаф</field>
+        <field name="code">oven</field>
+        <field name="sequence">5</field>
+    </record>
+
+    <record id="appliance_microwave" model="estate.appliance">
+        <field name="name">Микроволновка</field>
+        <field name="code">microwave</field>
+        <field name="sequence">6</field>
+    </record>
+
+    <record id="appliance_tv" model="estate.appliance">
+        <field name="name">Телевизор</field>
+        <field name="code">tv</field>
+        <field name="sequence">7</field>
+    </record>
+
+    <record id="appliance_boiler" model="estate.appliance">
+        <field name="name">Бойлер</field>
+        <field name="code">boiler</field>
+        <field name="sequence">8</field>
+    </record>
+</odoo>
