@@ -522,3 +522,11 @@ class EstateProperty(models.Model):
         "property_id",
         string="Фотографии",
     )
+
+    @api.model
+    def get_twogis_api_key(self):
+        return (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("royal_estate.twogis_api_key", "")
+        )
