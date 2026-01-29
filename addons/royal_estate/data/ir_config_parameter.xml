@@ -5,5 +5,9 @@
             <field name="key">royal_estate.twogis_api_key</field>
             <field name="value"></field>
         </record>
+        <record id="config_yandex_geocoder_api_key" model="ir.config_parameter">
+            <field name="key">royal_estate.yandex_geocoder_api_key</field>
+            <field name="value"></field>
+        </record>
     </data>
 </odoo>

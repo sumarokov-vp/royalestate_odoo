@@ -1,4 +1,10 @@
+import logging
+import requests
+
 from odoo import api, fields, models
+from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 
 class EstateProperty(models.Model):
@@ -77,7 +83,7 @@ class EstateProperty(models.Model):
     street_id = fields.Many2one(
         "estate.street",
         string="Улица",
-        domain="[('district_id', '=', district_id)]",
+        domain="[('city_id', '=', city_id)]",
     )
     house_number = fields.Char(string="Дом")
 
@@ -112,12 +118,82 @@ class EstateProperty(models.Model):
     def _onchange_city_id(self):
         if self.district_id and self.district_id.city_id != self.city_id:
             self.district_id = False
+        if self.street_id and self.street_id.city_id != self.city_id:
             self.street_id = False
 
-    @api.onchange("district_id")
-    def _onchange_district_id(self):
-        if self.street_id and self.street_id.district_id != self.district_id:
-            self.street_id = False
+    def action_detect_district(self):
+        self.ensure_one()
+        api_key = (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("royal_estate.yandex_geocoder_api_key")
+        )
+        if not api_key:
+            raise UserError("API ключ Yandex Geocoder не настроен")
+
+        address_parts = []
+        if self.city_id:
+            address_parts.append(self.city_id.name)
+        if self.street_id:
+            address_parts.append(self.street_id.name)
+        if self.house_number:
+            address_parts.append(self.house_number)
+
+        if not address_parts:
+            raise UserError("Укажите адрес для определения района")
+
+        address = ", ".join(address_parts)
+        response = requests.get(
+            "https://geocode-maps.yandex.ru/1.x/",
+            params={"apikey": api_key, "geocode": address, "format": "json"},
+            timeout=10,
+        )
+        response.raise_for_status()
+        data = response.json()
+
+        feature_members = (
+            data.get("response", {})
+            .get("GeoObjectCollection", {})
+            .get("featureMember", [])
+        )
+        if not feature_members:
+            raise UserError(f"Адрес не найден: {address}")
+
+        geo_object = feature_members[0].get("GeoObject", {})
+        components = (
+            geo_object.get("metaDataProperty", {})
+            .get("GeocoderMetaData", {})
+            .get("Address", {})
+            .get("Components", [])
+        )
+
+        district_name = None
+        for component in components:
+            if component.get("kind") == "district":
+                district_name = component.get("name")
+                break
+
+        if district_name:
+            district = self.env["estate.district"].search(
+                [("name", "ilike", district_name), ("city_id", "=", self.city_id.id)],
+                limit=1,
+            )
+            if not district and self.city_id:
+                district = self.env["estate.district"].create(
+                    {"name": district_name, "city_id": self.city_id.id}
+                )
+            if district:
+                self.district_id = district.id
+
+        if not self.latitude or not self.longitude:
+            pos = geo_object.get("Point", {}).get("pos", "")
+            if pos:
+                lon, lat = pos.split()
+                self.latitude = float(lat)
+                self.longitude = float(lon)
+
+        if not district_name:
+            _logger.warning("Район не найден в ответе геокодера для адреса: %s", address)
 
     # === Характеристики строения ===
     floor = fields.Integer(string="Этаж")

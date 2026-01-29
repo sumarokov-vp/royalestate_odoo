@@ -70,7 +70,15 @@
                             <group>
                                 <group string="Адрес">
                                     <field name="city_id"/>
-                                    <field name="district_id"/>
+                                    <label for="district_id"/>
+                                    <div class="o_row">
+                                        <field name="district_id"/>
+                                        <button name="action_detect_district"
+                                                type="object"
+                                                string="Определить"
+                                                class="btn-link"
+                                                icon="fa-map-marker"/>
+                                    </div>
                                     <field name="street_id"/>
                                     <field name="house_number"/>
                                 </group>
