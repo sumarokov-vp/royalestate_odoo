@@ -60,7 +60,9 @@ PostgreSQL запускается отдельно (внешний). Настр�
 ### SSH доступ
 
 **Для Claude Code:**
+Ключ хранится в переменной окружения `SSH_PRIVATE_KEY`. Перед использованием записать в файл:
 ```bash
+mkdir -p /home/user/.ssh && echo "$SSH_PRIVATE_KEY" > /home/user/.ssh/royal_estate_deploy && chmod 600 /home/user/.ssh/royal_estate_deploy
 ssh -i /home/user/.ssh/royal_estate_deploy root@46.101.177.22
 ```
 
